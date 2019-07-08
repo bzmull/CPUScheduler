@@ -7,8 +7,8 @@
 class Process
 {
 public:
-    int proc_num, AT, TC, CB, IO, static_prio;
-    int state_ts = 0;
+    int proc_num, AT, TC, CB, IO, static_prio, FT=0, TT=0, IT=0, CW=0, ready_start_time=0, total_cb=0, state_ts = 0;
+    int static_TC;
     int remaining_time;     //for SRTF
     Process(int proc_num, int at, int tc, int cb, int io, int st_prio) {
         this->proc_num = proc_num;
@@ -17,6 +17,7 @@ public:
         CB = cb;
         IO = io;
         static_prio = st_prio;
+        static_TC = TC;
         remaining_time = TC;
         state_ts = AT;       //the start time at a specific state
 

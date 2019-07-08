@@ -22,14 +22,15 @@ int main() {
         rand_vals.push_back(rand);
 
 
-    int max_prio = 4;   //by default for FCFS
+    int max_prio = 4;   //by default for FCFS and co.
     int static_prio = 0;
 
     int AT, TC, CB, IO;
     int proc_num = 0;
     list<Process *> ready_queue;
     list<Event *> event_list;
-    string file_path = "./lab2_assign/input0";
+    list<Event *> finished_processes;
+    string file_path = "./lab2_assign/input3";
     FILE *ptr2 = fopen(file_path.c_str(), "r");
 
     while (fscanf(ptr2, "%d %d %d %d", &AT, &TC, &CB, &IO) > 0) {
@@ -142,6 +143,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
 {
     FCFS *sched = new FCFS();
 
+    list<Event *> finished_processes;
     Process *CURRENT_RUNNING_PROCESS = nullptr;
     Event *evt;
     while((evt = get_event(event_list)))
@@ -163,33 +165,45 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
             case TRANS_TO_READY:
                 if(was_blocked)
                     printf("%d %d %d: BLOCK -> READY\n", evt->time_stamp, proc->proc_num, time_in_state);
+                proc->ready_start_time = current_time;
                 sched->add_process(proc, ready_queue); //add to ready_Q --> main functionality of whichever algorithm.
 //                printf("ready proc AT = <%d>\n", ready_queue.front()->AT);
-//                evt->state = TRANS_TO_RUNNING;
                 put_event(current_time, proc, TRANS_TO_RUNNING, event_list);
                 call_sched = true;
                 break;
             case TRANS_TO_RUNNING:
-                cb = get_random_number(proc->get_CB(), ofs, rand_vals); //create random CB
-                time_in_state = 0;
-                printf("%d %d %d: READY -> RUNNG cb=%d rem=%d prio=%d\n", evt->time_stamp, proc->proc_num,
-                       time_in_state, cb, proc->TC, proc->static_prio-1);
-                proc->TC = proc->TC - cb;
-                proc->state_ts = current_time;
-                current_time = current_time + cb;
+                if(CURRENT_RUNNING_PROCESS== nullptr)
+                {
+                    CURRENT_RUNNING_PROCESS = proc;
+                    cb = get_random_number(proc->get_CB(), ofs, rand_vals); //create random CB
+                    time_in_state = 0;
+                    printf("%d %d %d: READY -> RUNNG cb=%d rem=%d prio=%d\n", evt->time_stamp, proc->proc_num,
+                           time_in_state, cb, proc->TC, proc->static_prio-1);
+                    proc->TC = proc->TC - cb;
+                    proc->state_ts = current_time;
+                    proc->CW = current_time - proc->ready_start_time;
+                    proc->total_cb += cb;
+                    current_time = current_time + cb;
 //                evt->state = TRANS_TO_BLOCKED; //and change to TRANS_TO_BLOCKED (or PREEMPT if using PREPRIO)
+                }
                 if(proc->TC > 0)
                     put_event(current_time, proc, TRANS_TO_BLOCKED, event_list);
-                else
+                else {
                     printf("%d %d %d: Done\n", current_time, proc->proc_num, cb);
+                    proc->FT = current_time;
+                    proc->TT = current_time - proc->AT;
+                    put_event(proc->proc_num, proc, TRANS_TO_READY, finished_processes);
+                }
                 break;
             case TRANS_TO_BLOCKED:
+                CURRENT_RUNNING_PROCESS = nullptr;
                 was_blocked = true;
                 call_sched = true;
                 io = get_random_number(proc->get_IO(), ofs, rand_vals); //create random IO
-                printf("%d %d %d: RUNNG -> BLOCK ib=%d rem=%d\n", evt->time_stamp, proc->proc_num,
+                printf("%d %d %d: RUNNG -> BLOCK  ib=%d rem=%d\n", evt->time_stamp, proc->proc_num,
                        time_in_state, io, proc->TC);
                 proc->state_ts = current_time;
+                proc->IT = proc->IT + io;
                 current_time = current_time + io;
 //                evt->state = TRANS_TO_READY; //and change to TRANS_TO_READY
                 put_event(current_time, proc, TRANS_TO_READY, event_list);
@@ -219,6 +233,32 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
             }
         }
     }
+    //FINAL PRINT
+
+    double total_cpu_util=0, total_io_util=0, total_tt=0, total_cw=0, thru_put=0.0;
+    int fin_time=0, counter=0;
+    list<Event *>::iterator iter = finished_processes.begin();
+    char *sched_algo;
+    sched_algo = "FCFS";
+    printf("%s\n", sched_algo);
+    for(iter=finished_processes.begin(); iter!=finished_processes.end(); ++iter)
+    {
+        Process *proc = (*iter)->process;
+        printf("%04d: %4d %4d %4d %4d %1d | %5d %5d %5d %5d\n",
+                counter++, proc->AT, proc->static_TC, proc->CB, proc->IO,
+                proc->static_prio, proc->FT, proc->TT, proc->IT, proc->CW);
+        fin_time = proc->FT;
+        total_cpu_util += proc->total_cb;
+        total_io_util += proc->IT;
+        total_tt += proc->TT;
+        total_cw += proc->CW;
+    }
+    int num_procs = finished_processes.size();
+    double temp = (double)fin_time/(double)100;
+    thru_put = (double)num_procs/temp;
+    printf("SUM: %d %.2lf %.2lf %.2lf %.2lf %.3lf\n",
+            fin_time, total_cpu_util/fin_time*100, total_io_util/fin_time*100,
+            total_tt/num_procs, total_cw/num_procs, thru_put);
 }
 
 
