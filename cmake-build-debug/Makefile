@@ -123,6 +123,33 @@ CPUScheduler/fast:
 	$(MAKE) -f CMakeFiles/CPUScheduler.dir/build.make CMakeFiles/CPUScheduler.dir/build
 .PHONY : CPUScheduler/fast
 
+classes.o: classes.cpp.o
+
+.PHONY : classes.o
+
+# target to build an object file
+classes.cpp.o:
+	$(MAKE) -f CMakeFiles/CPUScheduler.dir/build.make CMakeFiles/CPUScheduler.dir/classes.cpp.o
+.PHONY : classes.cpp.o
+
+classes.i: classes.cpp.i
+
+.PHONY : classes.i
+
+# target to preprocess a source file
+classes.cpp.i:
+	$(MAKE) -f CMakeFiles/CPUScheduler.dir/build.make CMakeFiles/CPUScheduler.dir/classes.cpp.i
+.PHONY : classes.cpp.i
+
+classes.s: classes.cpp.s
+
+.PHONY : classes.s
+
+# target to generate assembly for a file
+classes.cpp.s:
+	$(MAKE) -f CMakeFiles/CPUScheduler.dir/build.make CMakeFiles/CPUScheduler.dir/classes.cpp.s
+.PHONY : classes.cpp.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -159,6 +186,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... CPUScheduler"
 	@echo "... edit_cache"
+	@echo "... classes.o"
+	@echo "... classes.i"
+	@echo "... classes.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

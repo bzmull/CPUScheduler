@@ -6,7 +6,27 @@
 
 #IncludeRegexTransform: 
 
-/home/ben/CLionProjects/CPUScheduler/main.cpp
+/home/ben/CLionProjects/CPUScheduler/classes.cpp
+header.h
+/home/ben/CLionProjects/CPUScheduler/header.h
+
+/home/ben/CLionProjects/CPUScheduler/header.h
 iostream
 -
+fstream
+-
+stdio.h
+-
+string
+-
+sstream
+-
+queue
+-
+list
+-
+
+/home/ben/CLionProjects/CPUScheduler/main.cpp
+classes.cpp
+/home/ben/CLionProjects/CPUScheduler/classes.cpp
 

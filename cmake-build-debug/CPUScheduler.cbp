@@ -84,6 +84,12 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/ben/CLionProjects/CPUScheduler/classes.cpp">
+			<Option target="CPUScheduler"/>
+		</Unit>
+		<Unit filename="/home/ben/CLionProjects/CPUScheduler/header.h">
+			<Option target="CPUScheduler"/>
+		</Unit>
 		<Unit filename="/home/ben/CLionProjects/CPUScheduler/main.cpp">
 			<Option target="CPUScheduler"/>
 		</Unit>

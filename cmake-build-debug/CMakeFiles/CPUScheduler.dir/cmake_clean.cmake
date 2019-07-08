@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/CPUScheduler.dir/main.cpp.o"
+  "CMakeFiles/CPUScheduler.dir/classes.cpp.o"
   "CPUScheduler.pdb"
   "CPUScheduler"
 )

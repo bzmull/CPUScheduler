@@ -6,15 +6,20 @@
 
 class Process
 {
-private:
-    int AT, TC, CB, IO;
-
 public:
-    Process(int at, int tc, int cb, int io) {
-        AT = at;
+    int proc_num, AT, TC, CB, IO, static_prio;
+    int state_ts = 0;
+    int remaining_time;     //for SRTF
+    Process(int proc_num, int at, int tc, int cb, int io, int st_prio) {
+        this->proc_num = proc_num;
+        this->AT = at;
         TC = tc;
         CB = cb;
         IO = io;
+        static_prio = st_prio;
+        remaining_time = TC;
+        state_ts = AT;       //the start time at a specific state
+
     }
     int get_AT(){return AT;}
     int get_TC(){return TC;}
@@ -42,51 +47,78 @@ public:
 
 class Scheduler
 {
-    queue <Process *> event_queue;
-
 public:
-    Scheduler(queue <Process *> event_q)
+//    list <Process *> ready_queue;
+
+//    Scheduler(list <Process *> ready_queue)
+//    {
+//        this->ready_queue = ready_queue;
+//    }
+    Process* get_next_process(list <Process *> &ready_queue)
     {
-        event_queue = event_q;
-    }
-    Process* getNextProcess()
-    {
-        Process *proc = event_queue.front();
-        event_queue.pop();
+        Process *proc = ready_queue.front();
+        ready_queue.pop_front();
         return proc;
     }
-    void addProcess(Process *proc)
+    void add_process(Process *proc, list <Process *> &ready_queue){}   //functions to add and get process from RUN_QUEUE
+};
+
+
+class FCFS : public Scheduler
+{
+public:
+    void add_process(Process *proc, list <Process *> &ready_queue)
     {
-        event_queue.push(proc);
+        ready_queue.push_front(proc);
     }
 };
 
-class FCFS : Scheduler
-{
-
-};
 
 class LCFS : Scheduler
 {
+public:
+    void add_process()      //functions to add and get process from RUN_QUEUE
+    {
 
+    }
 };
+
 
 class SRTF : Scheduler
 {
+public:
+    void add_process()      //functions to add and get process from RUN_QUEUE
+    {
 
+    }
 };
+
 
 class RoundRobin : Scheduler
 {
+public:
+    void add_process()      //functions to add and get process from RUN_QUEUE
+    {
 
+    }
 };
+
 
 class Prio : Scheduler
 {
+public:
+    void add_process()      //functions to add and get process from RUN_QUEUE
+    {
 
+    }
 };
+
 
 class PrePrio : Scheduler
 {
+public:
+    void add_process()      //functions to add and get process from RUN_QUEUE
+    {
 
+    }
 };
