@@ -74,7 +74,17 @@ public:
 };
 
 
-class LCFS : Scheduler
+class LCFS : public Scheduler
+{
+public:
+    void add_process(Process *proc, list <Process *> &ready_queue)
+    {
+        ready_queue.push_back(proc);
+    }
+};
+
+
+class SRTF : public Scheduler
 {
 public:
     void add_process()      //functions to add and get process from RUN_QUEUE
@@ -84,7 +94,7 @@ public:
 };
 
 
-class SRTF : Scheduler
+class RoundRobin : public Scheduler
 {
 public:
     void add_process()      //functions to add and get process from RUN_QUEUE
@@ -94,7 +104,7 @@ public:
 };
 
 
-class RoundRobin : Scheduler
+class Prio : public Scheduler
 {
 public:
     void add_process()      //functions to add and get process from RUN_QUEUE
@@ -104,17 +114,7 @@ public:
 };
 
 
-class Prio : Scheduler
-{
-public:
-    void add_process()      //functions to add and get process from RUN_QUEUE
-    {
-
-    }
-};
-
-
-class PrePrio : Scheduler
+class PrePrio : public Scheduler
 {
 public:
     void add_process()      //functions to add and get process from RUN_QUEUE

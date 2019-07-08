@@ -173,7 +173,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                 cb = get_random_number(proc->get_CB(), ofs, rand_vals); //create random CB
                 time_in_state = 0;
                 printf("%d %d %d: READY -> RUNNG cb=%d rem=%d prio=%d\n", evt->time_stamp, proc->proc_num,
-                        time_in_state, cb, proc->TC, proc->static_prio-1);
+                       time_in_state, cb, proc->TC, proc->static_prio-1);
                 proc->TC = proc->TC - cb;
                 proc->state_ts = current_time;
                 current_time = current_time + cb;
@@ -181,7 +181,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                 if(proc->TC > 0)
                     put_event(current_time, proc, TRANS_TO_BLOCKED, event_list);
                 else
-                    printf("%d %d %d: Done\n", current_time, proc->proc_num, time_in_state);
+                    printf("%d %d %d: Done\n", current_time, proc->proc_num, cb);
                 break;
             case TRANS_TO_BLOCKED:
                 was_blocked = true;
@@ -237,6 +237,6 @@ int get_random_number(int burst, int &ofs, vector<int> rand_vals)
 //    ofs++;
     if(ofs > total_vals)
         ofs = 1;
-    printf("rand index = <%d>\n", ofs);
+//    printf("rand index = <%d>\n", ofs);
     return 1 + (rand_vals[ofs++] % burst);
 }

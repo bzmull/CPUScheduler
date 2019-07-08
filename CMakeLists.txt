@@ -3,4 +3,4 @@ project(CPUScheduler)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(CPUScheduler main.cpp header.h classes.cpp)
+add_executable(CPUScheduler main.cpp header.h classes.cpp main.cpp)
