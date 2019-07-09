@@ -9,6 +9,7 @@ class Process
 public:
     int proc_num, AT, TC, CB, IO, static_prio, FT=0, TT=0, IT=0, CW=0, ready_start_time=0, total_cb=0, state_ts = 0;
     int static_TC;
+    trans_to prev_state = CREATED;
     int remaining_time;     //for SRTF
     Process(int proc_num, int at, int tc, int cb, int io, int st_prio) {
         this->proc_num = proc_num;
@@ -33,13 +34,14 @@ class Event
 public:
     int time_stamp;
     Process *process;
-    trans_to state;
+    trans_to state, prev_state;
 
     Event(int ts, Process *proc, trans_to state1)
     {
         time_stamp = ts;
         process = proc;
         state = state1;
+        this->prev_state = prev_state;
     }
 //    int get_ts(){return time_stamp;}
 //    Process get_proc(){ return *process;}

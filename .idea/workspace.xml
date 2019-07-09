@@ -11,11 +11,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d0b1d990-8e79-47a7-b6ea-bf7ce61c0828" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
+    <list default="true" id="d0b1d990-8e79-47a7-b6ea-bf7ce61c0828" name="Default Changelist" comment="Functional FCFS">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/classes.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run.sh" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -33,16 +33,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="352">
-              <caret line="277" column="43" selection-start-line="277" selection-start-column="43" selection-end-line="277" selection-end-column="43" />
+            <state relative-caret-position="477">
+              <caret line="38" column="58" selection-start-line="38" selection-start-column="58" selection-end-line="38" selection-end-column="58" />
             </state>
           </provider>
         </entry>
@@ -50,8 +45,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/classes.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1310">
-              <caret column="2" selection-start-column="2" selection-end-column="2" />
+            <state relative-caret-position="242">
+              <caret line="11" column="34" selection-start-line="11" selection-start-column="34" selection-end-line="11" selection-end-column="34" />
             </state>
           </provider>
         </entry>
@@ -59,8 +54,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/run.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="22">
-              <caret line="1" column="30" selection-start-line="1" selection-start-column="30" selection-end-line="1" selection-end-column="30" />
+            <state relative-caret-position="154">
+              <caret line="7" column="51" selection-start-line="7" selection-start-column="51" selection-end-line="7" selection-end-column="51" />
             </state>
           </provider>
         </entry>
@@ -81,15 +76,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>printf</find>
-      <find>get_eve</find>
-      <find>event_q</find>
-      <find>i++</find>
-      <find>run_queu</find>
-      <find>ready</find>
-      <find>time_stamp</find>
-      <find>CURRENT_RUNNING_PROCESS</find>
-      <find>sche</find>
       <find>sched-&gt;</find>
       <find>print_</find>
       <find>print</find>
@@ -103,6 +89,23 @@
       <find>pro</find>
       <find>trans_TO_RUnning</find>
       <find>trans</find>
+      <find>finish</find>
+      <find>finished</find>
+      <find>trans_TO_run</find>
+      <find>trans_TO_runNING</find>
+      <find>IT</find>
+      <find>simula</find>
+      <find>counte</find>
+      <find>block_counte</find>
+      <find>printf</find>
+      <find>proc-&gt;CW</find>
+      <find>trans_to_ready</find>
+      <find>simu</find>
+      <find>put</find>
+      <find>put_even</find>
+      <find>was_blocked</find>
+      <find>final</find>
+      <find>FCFS</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -113,11 +116,16 @@
       <list>
         <option value="$PROJECT_DIR$/test.cpp" />
         <option value="$PROJECT_DIR$/header.h" />
-        <option value="$PROJECT_DIR$/run.sh" />
         <option value="$PROJECT_DIR$/classes.cpp" />
+        <option value="$PROJECT_DIR$/run.sh" />
         <option value="$PROJECT_DIR$/main.cpp" />
       </list>
     </option>
+  </component>
+  <component name="JsbtTreeLayoutManager">
+    <layout place="tools.popupGrunt">
+      <scroll-view-position x="0" y="0" />
+    </layout>
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds" extendedState="6">
@@ -189,7 +197,7 @@
       <workItem from="1561926300659" duration="3344000" />
       <workItem from="1561947217130" duration="52385000" />
       <workItem from="1562296594317" duration="46534000" />
-      <workItem from="1562685819560" duration="5022000" />
+      <workItem from="1562685819560" duration="10761000" />
     </task>
     <task id="LOCAL-00001" summary="Almost functional FCFS">
       <created>1562551710779</created>
@@ -212,11 +220,25 @@
       <option name="project" value="LOCAL" />
       <updated>1562611080507</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Almost functional FCFS">
+      <created>1562690906960</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1562690906960</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Functional FCFS">
+      <created>1562692732203</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1562692732203</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="131907000" />
+    <option name="totallyTimeSpent" value="137646000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="25" width="1853" height="1055" extended-state="6" />
@@ -227,7 +249,7 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32937366" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32937366" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.30237582" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.32397407" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -249,7 +271,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Almost functional FCFS" />
-    <option name="LAST_COMMIT_MESSAGE" value="Almost functional FCFS" />
+    <MESSAGE value="Functional FCFS" />
+    <option name="LAST_COMMIT_MESSAGE" value="Functional FCFS" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/TestClass.cpp" />
@@ -305,22 +328,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/classes.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1310">
-          <caret column="2" selection-start-column="2" selection-end-column="2" />
+        <state relative-caret-position="242">
+          <caret line="11" column="34" selection-start-line="11" selection-start-column="34" selection-end-line="11" selection-end-column="34" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/run.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="22">
-          <caret line="1" column="30" selection-start-line="1" selection-start-column="30" selection-end-line="1" selection-end-column="30" />
+        <state relative-caret-position="154">
+          <caret line="7" column="51" selection-start-line="7" selection-start-column="51" selection-end-line="7" selection-end-column="51" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="277" column="43" selection-start-line="277" selection-start-column="43" selection-end-line="277" selection-end-column="43" />
+        <state relative-caret-position="477">
+          <caret line="38" column="58" selection-start-line="38" selection-start-column="58" selection-end-line="38" selection-end-column="58" />
         </state>
       </provider>
     </entry>
