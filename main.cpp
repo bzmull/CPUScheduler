@@ -199,7 +199,7 @@ Event *get_event(list<Event *> &event_list)
 
 void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs, vector<int> rand_vals)
 {
-    LCFS *sched = new LCFS();
+    SRTF *sched = new SRTF();
 
     list<Event *> finished_processes;
     Process *CURRENT_RUNNING_PROCESS = nullptr;
@@ -342,7 +342,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
     int fin_time=0, counter=0;
     list<Event *>::iterator iter = finished_processes.begin();
     string sched_algo;
-    sched_algo = "LCFS";
+    sched_algo = "SRTF";
     cout << sched_algo << endl;
 //    printf("%s\n", sched_algo);
     for(iter=finished_processes.begin(); iter!=finished_processes.end(); ++iter)

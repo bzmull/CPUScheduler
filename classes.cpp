@@ -92,9 +92,22 @@ public:
 class SRTF : public Scheduler
 {
 public:
-    void add_process()      //functions to add and get process from RUN_QUEUE
+    void add_process(Process *proc, list <Process *> &ready_queue)      //functions to add and get process from RUN_QUEUE
     {
-
+        bool is_inserted = false;
+        list<Process *>::iterator iter;
+        for(iter=ready_queue.begin(); iter!=ready_queue.end(); ++iter)
+        {
+            if(proc->TC >= (*iter)->TC)
+                continue;
+            else {
+                ready_queue.insert(iter, proc);
+                is_inserted = true;
+                break;
+            }
+        }
+        if(!is_inserted)
+            ready_queue.insert(ready_queue.end(),proc);
     }
 };
 
