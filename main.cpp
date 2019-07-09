@@ -15,6 +15,7 @@ bool debug = false;
 int main() {
     int ofs = 1;
     int rand;
+
     vector<int> rand_vals;
     string rand_ints_file_path = "./lab2_assign/rfile";
     FILE *ptr1 = fopen(rand_ints_file_path.c_str(), "r");
@@ -30,14 +31,16 @@ int main() {
     int proc_num = 0;
     list<Process *> ready_queue;
     list<Event *> event_list;
+    list<Process *> proc_table;
     list<Event *> finished_processes;
-    string file_path = "./lab2_assign/input2";
+    string file_path = "./lab2_assign/input3";
     FILE *ptr2 = fopen(file_path.c_str(), "r");
 
     while (fscanf(ptr2, "%d %d %d %d", &AT, &TC, &CB, &IO) > 0) {
         static_prio = get_random_number(max_prio, ofs, rand_vals);
         Process *process = new Process(proc_num, AT, TC, CB, IO, static_prio);
         put_event(AT, process, CREATED, event_list);
+        proc_table.push_back(process);
         proc_num++;
 //        ready_queue.push(process);
     }
@@ -201,11 +204,21 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
     list<Event *> finished_processes;
     Process *CURRENT_RUNNING_PROCESS = nullptr;
     Event *evt;
+    int block_counter = 0;
+    int block_time = 0;
+    int current_time = 0;
+    int delta_time = 0;
+
     while((evt = get_event(event_list)))
     {
         Process *proc = evt->process;
-        int current_time = evt->time_stamp;
+        delta_time = evt->time_stamp - current_time;
+        current_time = evt->time_stamp;
         int time_in_state = current_time - proc->state_ts;
+
+        if (block_counter > 0) {
+            block_time += delta_time;
+        }
 
         if (debug) {
             printf("current time=%d, pid=%d, state ts=%d\n", current_time, proc->proc_num, proc->state_ts);
@@ -223,11 +236,14 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
             evt->state = TRANS_TO_READY;
         }
 
+
         switch(evt->state)
         {
             case TRANS_TO_READY:
-                if(was_blocked)
+                if(was_blocked) {
                     printf("%d %d %d: BLOCK -> READY\n", evt->time_stamp, proc->proc_num, time_in_state);
+                    block_counter --;
+                }
                 proc->ready_start_time = current_time;
                 sched->add_process(proc, ready_queue); //add to ready_Q --> main functionality of whichever algorithm.
 //                printf("ready proc AT = <%d>\n", ready_queue.front()->AT);
@@ -243,7 +259,8 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                        time_in_state, cb, proc->TC, proc->static_prio-1);
                 proc->TC = proc->TC - cb;
 //                proc->state_ts = current_time;
-                proc->CW = current_time - proc->ready_start_time;
+//                proc->CW = current_time - proc->ready_start_time;
+                proc->CW += time_in_state;
                 proc->total_cb += cb;
 //                current_time = current_time + cb;
 //                evt->state = TRANS_TO_BLOCKED; //and change to TRANS_TO_BLOCKED (or PREEMPT if using PREPRIO)
@@ -276,8 +293,10 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                     printf("%d %d %d: Done\n", current_time, proc->proc_num, cb);
                     proc->FT = current_time;
                     proc->TT = current_time - proc->AT;
+                    put_event(proc->proc_num, proc, TRANS_TO_READY, finished_processes);
                 }
                 else {
+                    block_counter++;
                     io = get_random_number(proc->get_IO(), ofs, rand_vals); //create random IO
                     proc->IT = proc->IT + io;
                     printf("%d %d %d: RUNNG -> BLOCK  ib=%d rem=%d\n", evt->time_stamp, proc->proc_num,
@@ -339,7 +358,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
     double temp = (double)fin_time/(double)100;
     thru_put = (double)num_procs/temp;
     printf("SUM: %d %.2lf %.2lf %.2lf %.2lf %.3lf\n",
-            fin_time, total_cpu_util/fin_time*100, total_io_util/fin_time*100,
+            fin_time, total_cpu_util/fin_time*100, 1.*block_time/fin_time*100,
             total_tt/num_procs, total_cw/num_procs, thru_put);
 }
 
