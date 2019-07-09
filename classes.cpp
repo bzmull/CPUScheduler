@@ -57,6 +57,8 @@ public:
 //    }
     Process* get_next_process(list <Process *> &ready_queue)
     {
+        if(ready_queue.empty())
+            return nullptr;
         Process *proc = ready_queue.front();
         ready_queue.pop_front();
         return proc;
@@ -70,7 +72,7 @@ class FCFS : public Scheduler
 public:
     void add_process(Process *proc, list <Process *> &ready_queue)
     {
-        ready_queue.push_front(proc);
+        ready_queue.push_back(proc);
     }
 };
 
@@ -80,7 +82,7 @@ class LCFS : public Scheduler
 public:
     void add_process(Process *proc, list <Process *> &ready_queue)
     {
-        ready_queue.push_back(proc);
+        ready_queue.push_front(proc);
     }
 };
 
