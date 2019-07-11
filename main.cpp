@@ -1,30 +1,129 @@
 //#include "header.h"
 #include "classes.cpp"
-
+#include <cstring>
 
 list<Process*> read_file();
 void put_event(int time_stamp, Process *process, trans_to state, list<Event *> &event_list);
 Event *get_event(list<Event *> &event_list);
-void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs, vector<int> rand_vals);
+void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs,
+        vector<int> rand_vals, int time_quantum, sched_type schedType);
 int get_next_event_time(list<Event *> event_list);
 int get_random_number(int burst, int &ofs, vector<int> rand_vals);
 
 //bool debug = true;
 bool debug = false;
+bool print_verbose = false;
 
-int main(int argc, char *argv[]) {
+//int main() {
+//    sched_type schedType = F;
+//    int time_quantum = 10000;
+//    int max_prio = 4;   //by default for FCFS and co.
+//    string file_path = "./lab2_assign/input1";
+
+int main(int argc, char **argv) {
+
+    int arg_count = 1;
+    int time_quantum = 0;
+    int max_prio = 0;
+    char type;
+    Scheduler *sched;
+//    enum sched_type {F, L, S, R, P, E};
+    sched_type schedType;
+    int option;
+    string rand_ints_file_path = "./lab2_assign/rfile";
+    string file_path = "./lab2_assign/input2";
+
+
+    if (argc > 1) {
+//        cout << argc << endl;
+        while ((option = getopt(argc, argv, "vtes:")) != -1) {
+            arg_count++;
+            switch (option) {
+                case 'v':
+                    print_verbose = true;
+                    break;
+
+                case 't':
+                    debug = true; //temporarily using debug for trace
+                    break;
+
+                case 'e':
+                    debug = true; //temporarily using debug for whatever e is
+                    break;
+
+                case 's': {
+                    //                sscanf(optarg, "%s%d:%d", &time_quantum, &max_prio);
+                    //                Scheduler *sched = new FCFS();
+                    time_quantum = 10000;
+                    max_prio = 4;
+
+                    int len = strlen(optarg);
+//                        cout << len << optarg[0] << endl;
+                    if (len == 1)
+                        switch (optarg[0]) {
+                            case 'F':
+                                schedType = F;
+                                break;
+                            case 'L':
+                                schedType = L;
+                                break;
+                            case 'S':
+                                schedType = S;
+                                break;
+                        }
+                    else if (len > 1) {
+                        string str_optarg = optarg;
+                        if (str_optarg.find(":") == -1) {
+                            sscanf(optarg, "%c%d", &type, &time_quantum);
+//                            cout << type <<  " no colon " << time_quantum << endl;
+                        }
+                        else {
+                            sscanf(optarg, "%c%d:%d", &type, &time_quantum, &max_prio);
+//                            cout << "colon" << endl;
+                        }
+                        switch (type) {
+                            case 'R':
+//                                cout << "its R" << endl;
+                                schedType = R;
+                                break;
+                            case 'P':
+                                schedType = P;
+                                break;
+                            case 'E':
+                                schedType = E;
+                                break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        rand_ints_file_path = argv[arg_count+1];
+        file_path = argv[arg_count];
+    }
+    else {
+        schedType = R;
+        time_quantum = 2;
+        max_prio = 4;
+
+    }
+//    cout << schedType << " " << time_quantum << endl;
+//    cout << "in path = " <<  file_path << endl;
+//    int time_quantum = strtol(argv[2], nullptr, 10);
+
+//    printf("quantum = <%d>\n", time_quantum);
+
     int ofs = 1;
     int rand;
 
     vector<int> rand_vals;
-    string rand_ints_file_path = "./lab2_assign/rfile";
+//    string rand_ints_file_path = argv[arg_count+1];
     FILE *ptr1 = fopen(rand_ints_file_path.c_str(), "r");
 
     while(fscanf(ptr1, "%d", &rand) > 0)
         rand_vals.push_back(rand);
 
 
-    int max_prio = 4;   //by default for FCFS and co.
     int static_prio = 0;
 
     int AT, TC, CB, IO;
@@ -33,7 +132,9 @@ int main(int argc, char *argv[]) {
     list<Event *> event_list;
     list<Process *> proc_table;
     list<Event *> finished_processes;
-    string file_path = argv[1];
+
+//    string file_path = argv[2];
+//    string file_path = argv[arg_count];
     FILE *ptr2 = fopen(file_path.c_str(), "r");
 
     while (fscanf(ptr2, "%d %d %d %d", &AT, &TC, &CB, &IO) > 0) {
@@ -64,7 +165,8 @@ int main(int argc, char *argv[]) {
 //        printf("rand %d = <%d>\n", i+1, num);
 //    }
 
-    simulation(event_list, ready_queue, ofs, rand_vals);
+//    Scheduler *sched1 = new FCFS();
+    simulation(event_list, ready_queue, ofs, rand_vals, time_quantum, schedType);
 }
 
 
@@ -197,9 +299,43 @@ Event *get_event(list<Event *> &event_list)
 }
 
 
-void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs, vector<int> rand_vals)
+void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs,
+        vector<int> rand_vals, int time_quantum, sched_type schedType)
 {
-    SRTF *sched = new SRTF();
+    string sched_algo;
+    Scheduler *sched;
+    switch (schedType) {
+        case F: {
+            sched = new FCFS();
+            sched_algo = "FCFS";
+            break;
+        }
+        case L: {
+            sched = new LCFS();
+            sched_algo = "LCFS";
+            break;
+        }
+        case S: {
+            sched = new SRTF();
+            sched_algo = "SRTF";
+            break;
+        }
+        case R: {
+            sched = new RoundRobin();
+            sched_algo = "RR";
+            break;
+        }
+        case P: {
+            sched = new Prio();
+            sched_algo = "PRIO";
+            break;
+        }
+        case E: {
+            sched = new PrePrio();
+            sched_algo = "PREPRIO";
+            break;
+        }
+    }
 
     list<Event *> finished_processes;
     Process *CURRENT_RUNNING_PROCESS = nullptr;
@@ -208,6 +344,8 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
     int block_time = 0;
     int current_time = 0;
     int delta_time = 0;
+    int cb_counter = 0;
+    bool reuse_cb = false;
 
     while((evt = get_event(event_list)))
     {
@@ -232,7 +370,8 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
         if(evt->state == CREATED)
         {
             was_blocked = false;
-            printf("%d %d %d: CREATED -> READY\n", evt->time_stamp, proc->proc_num, time_in_state);
+            if(print_verbose)
+                printf("%d %d %d: CREATED -> READY\n", evt->time_stamp, proc->proc_num, time_in_state);
             evt->state = TRANS_TO_READY;
         }
 
@@ -241,7 +380,8 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
         {
             case TRANS_TO_READY:
                 if(was_blocked) {
-                    printf("%d %d %d: BLOCK -> READY\n", evt->time_stamp, proc->proc_num, time_in_state);
+                    if(print_verbose)
+                        printf("%d %d %d: BLOCK -> READY\n", evt->time_stamp, proc->proc_num, time_in_state);
                     block_counter --;
                 }
                 proc->ready_start_time = current_time;
@@ -251,48 +391,53 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                 call_sched = true;
                 break;
             case TRANS_TO_RUNNING:
-                cb = get_random_number(proc->get_CB(), ofs, rand_vals); //create random CB
+                if(!reuse_cb) {
+                    cb = get_random_number(proc->get_CB(), ofs, rand_vals); //create random CB
+                    cb_counter = cb;
+                }
+                else {
+                    cb = time_quantum;
+                    if(cb_counter >= time_quantum) {
+                        cb_counter -= cb;
+                    }
+                    else {
+                        cb = cb_counter;
+                        reuse_cb = false;
+                    }
+                }
                 if(cb > proc->TC)
                     cb = proc->TC;
 //                time_in_state = 0;
-                printf("%d %d %d: READY -> RUNNG cb=%d rem=%d prio=%d\n", evt->time_stamp, proc->proc_num,
-                       time_in_state, cb, proc->TC, proc->static_prio-1);
+                if(print_verbose)
+                    printf("%d %d %d: READY -> RUNNG cb=%d rem=%d prio=%d\n", evt->time_stamp, proc->proc_num,
+                            time_in_state, cb, proc->TC, proc->static_prio-1);
+                if(cb > time_quantum) {
+                    cb = time_quantum;  //adjust for quantum after printing original CB
+
+                }
                 proc->TC = proc->TC - cb;
-//                proc->state_ts = current_time;
-//                proc->CW = current_time - proc->ready_start_time;
                 proc->CW += time_in_state;
                 proc->total_cb += cb;
-//                current_time = current_time + cb;
-//                evt->state = TRANS_TO_BLOCKED; //and change to TRANS_TO_BLOCKED (or PREEMPT if using PREPRIO)
                 proc->prev_state = TRANS_TO_RUNNING;
-                put_event(current_time+cb, proc, TRANS_TO_BLOCKED, event_list);
+                if(!reuse_cb)
+                    put_event(current_time+cb, proc, TRANS_TO_BLOCKED, event_list);
+                else
+                    put_event(current_time+cb, proc, TRANS_TO_READY, event_list);
 
-//                if(proc->TC > 0)
-//                    put_event(current_time+cb, proc, TRANS_TO_BLOCKED, event_list);
-//                else {
-//                    printf("%d %d %d: Done\n", current_time+cb, proc->proc_num, cb);
-//                    proc->FT = current_time + cb;
-//                    proc->TT = current_time + cb - proc->AT;
-//                    put_event(proc->proc_num, proc, TRANS_TO_READY, finished_processes);
-//                }
+                if(time_quantum < cb)
+                    reuse_cb = true;
+
                 break;
             case TRANS_TO_BLOCKED:
                 CURRENT_RUNNING_PROCESS = nullptr;
                 was_blocked = true;
                 call_sched = true;
                 proc->prev_state = TRANS_TO_BLOCKED;
-//                io = get_random_number(proc->get_IO(), ofs, rand_vals); //create random IO
-//                printf("%d %d %d: RUNNG -> BLOCK  ib=%d rem=%d\n", evt->time_stamp, proc->proc_num,
-//                       time_in_state, io, proc->TC);
-//                proc->state_ts = current_time;
-//                proc->IT = proc->IT + io;
-//                current_time = current_time + io;
-//                evt->state = TRANS_TO_READY; //and change to TRANS_TO_READY
-//                put_event(current_time+io, proc, TRANS_TO_READY, event_list);
 
                 if(proc->TC==0)
                 {
-                    printf("%d %d %d: Done\n", current_time, proc->proc_num, cb);
+                    if(print_verbose)
+                        printf("%d %d %d: Done\n", current_time, proc->proc_num, cb);
                     proc->FT = current_time;
                     proc->TT = current_time - proc->AT;
                     put_event(proc->proc_num, proc, TRANS_TO_READY, finished_processes);
@@ -301,8 +446,9 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                     block_counter++;
                     io = get_random_number(proc->get_IO(), ofs, rand_vals); //create random IO
                     proc->IT = proc->IT + io;
-                    printf("%d %d %d: RUNNG -> BLOCK  ib=%d rem=%d\n", evt->time_stamp, proc->proc_num,
-                           time_in_state, io, proc->TC);
+                    if(print_verbose)
+                        printf("%d %d %d: RUNNG -> BLOCK  ib=%d rem=%d\n", evt->time_stamp, proc->proc_num,
+                                time_in_state, io, proc->TC);
                     put_event(current_time+io, proc, TRANS_TO_READY, event_list);
                 }
 
@@ -341,9 +487,8 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
     double total_cpu_util=0, total_io_util=0, total_tt=0, total_cw=0, thru_put=0.0;
     int fin_time=0, counter=0;
     list<Event *>::iterator iter = finished_processes.begin();
-    string sched_algo;
-    sched_algo = "SRTF";
     cout << sched_algo << endl;
+//    cout << sched_algo << " " << time_quantum << endl;
 //    printf("%s\n", sched_algo);
     for(iter=finished_processes.begin(); iter!=finished_processes.end(); ++iter)
     {
@@ -385,3 +530,33 @@ int get_random_number(int burst, int &ofs, vector<int> rand_vals)
 //    printf("rand index = <%d>\n", ofs);
     return 1 + (rand_vals[ofs++] % burst);
 }
+
+
+
+
+// END OF TRANS_TO_RUNNING
+//                proc->state_ts = current_time;
+//                proc->CW = current_time - proc->ready_start_time;
+
+//                current_time = current_time + cb;
+//                evt->state = TRANS_TO_BLOCKED; //and change to TRANS_TO_BLOCKED (or PREEMPT if using PREPRIO)
+
+
+//                if(proc->TC > 0)
+//                    put_event(current_time+cb, proc, TRANS_TO_BLOCKED, event_list);
+//                else {
+//                    printf("%d %d %d: Done\n", current_time+cb, proc->proc_num, cb);
+//                    proc->FT = current_time + cb;
+//                    proc->TT = current_time + cb - proc->AT;
+//                    put_event(proc->proc_num, proc, TRANS_TO_READY, finished_processes);
+//                }
+
+//END OF TRANS_TO_BLOCKED
+//                io = get_random_number(proc->get_IO(), ofs, rand_vals); //create random IO
+//                printf("%d %d %d: RUNNG -> BLOCK  ib=%d rem=%d\n", evt->time_stamp, proc->proc_num,
+//                       time_in_state, io, proc->TC);
+//                proc->state_ts = current_time;
+//                proc->IT = proc->IT + io;
+//                current_time = current_time + io;
+//                evt->state = TRANS_TO_READY; //and change to TRANS_TO_READY
+//                put_event(current_time+io, proc, TRANS_TO_READY, event_list);

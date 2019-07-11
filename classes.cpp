@@ -10,7 +10,7 @@ public:
     int proc_num, AT, TC, CB, IO, static_prio, FT=0, TT=0, IT=0, CW=0, ready_start_time=0, total_cb=0, state_ts = 0;
     int static_TC;
     trans_to prev_state = CREATED;
-    int remaining_time;     //for SRTF
+    int remaining_time;     //for SRTF (used TC instead -> it's updated throughout the program)
     Process(int proc_num, int at, int tc, int cb, int io, int st_prio) {
         this->proc_num = proc_num;
         this->AT = at;
@@ -36,6 +36,7 @@ public:
     Process *process;
     trans_to state, prev_state;
 
+
     Event(int ts, Process *proc, trans_to state1)
     {
         time_stamp = ts;
@@ -57,7 +58,7 @@ public:
 //    {
 //        this->ready_queue = ready_queue;
 //    }
-    Process* get_next_process(list <Process *> &ready_queue)
+    Process* get_next_process(list <Process *> &ready_queue) //gets from ready_q
     {
         if(ready_queue.empty())
             return nullptr;
@@ -65,7 +66,7 @@ public:
         ready_queue.pop_front();
         return proc;
     }
-    void add_process(Process *proc, list <Process *> &ready_queue){}   //functions to add and get process from RUN_QUEUE
+    virtual void add_process(Process *proc, list <Process *> &ready_queue) = 0; //adds to ready_q (different for each algo)
 };
 
 
@@ -92,7 +93,7 @@ public:
 class SRTF : public Scheduler
 {
 public:
-    void add_process(Process *proc, list <Process *> &ready_queue)      //functions to add and get process from RUN_QUEUE
+    void add_process(Process *proc, list <Process *> &ready_queue)
     {
         bool is_inserted = false;
         list<Process *>::iterator iter;
@@ -115,9 +116,9 @@ public:
 class RoundRobin : public Scheduler
 {
 public:
-    void add_process()      //functions to add and get process from RUN_QUEUE
+    void add_process(Process *process, list<Process *> &ready_queue)
     {
-
+        ready_queue.push_back(process);
     }
 };
 
@@ -125,9 +126,9 @@ public:
 class Prio : public Scheduler
 {
 public:
-    void add_process()      //functions to add and get process from RUN_QUEUE
+    void add_process(Process *process, list<Process *> &ready_queue)
     {
-
+        ready_queue.push_back(process);
     }
 };
 
@@ -135,8 +136,8 @@ public:
 class PrePrio : public Scheduler
 {
 public:
-    void add_process()      //functions to add and get process from RUN_QUEUE
+    void add_process(Process *process, list<Process *> &ready_queue)
     {
-
+        ready_queue.push_back(process);
     }
 };

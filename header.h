@@ -14,9 +14,12 @@
 #include <sstream>
 #include <queue>
 #include <list>
+#include <getopt.h>
 
 using namespace std;
 
 
 enum trans_to {CREATED, TRANS_TO_READY, TRANS_TO_RUNNING, TRANS_TO_BLOCKED, TRANS_TO_PREEMPT};
+enum sched_type {F, L, S, R, P, E};
+
 
