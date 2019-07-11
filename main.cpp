@@ -14,6 +14,8 @@ int get_random_number(int burst, int &ofs, vector<int> rand_vals);
 bool debug = false;
 bool print_verbose = false;
 
+sched_type schedType;
+
 //int main() {
 //    sched_type schedType = F;
 //    int time_quantum = 10000;
@@ -28,7 +30,7 @@ int main(int argc, char **argv) {
     char type;
     Scheduler *sched;
 //    enum sched_type {F, L, S, R, P, E};
-    sched_type schedType;
+//    sched_type schedType;
     int option;
     string rand_ints_file_path = "./lab2_assign/rfile";
     string file_path = "./lab2_assign/input2";
@@ -102,9 +104,10 @@ int main(int argc, char **argv) {
         file_path = argv[arg_count];
     }
     else {
-        schedType = R;
-        time_quantum = 2;
-        max_prio = 4;
+        print_verbose = true;
+        schedType = P;
+        time_quantum = 5;
+        max_prio = 3;
 
     }
 //    cout << schedType << " " << time_quantum << endl;
@@ -143,7 +146,6 @@ int main(int argc, char **argv) {
         put_event(AT, process, CREATED, event_list);
         proc_table.push_back(process);
         proc_num++;
-//        ready_queue.push(process);
     }
 //    list<Event *>::iterator it = event_list.begin();
 //    printf("QSize = <%zu>\n", event_list.size());
@@ -379,53 +381,63 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
         switch(evt->state)
         {
             case TRANS_TO_READY:
-                if(was_blocked) {
+                if(proc->prev_state==TRANS_TO_RUNNING) {
+                    CURRENT_RUNNING_PROCESS = nullptr;
+                    proc->current_cb -= time_quantum;
+                    if(print_verbose)
+                        printf("%d %d %d: RUNNG -> READY  cb=%d rem=%d prio=%d\n", evt->time_stamp, proc->proc_num,
+                                time_in_state, proc->current_cb, proc->TC, proc->dynamic_prio);
+                    if (schedType == P || schedType == E) {
+                        proc->dynamic_prio--;
+                    }
+                }
+                if(proc->prev_state==TRANS_TO_BLOCKED) {
+                    proc->current_cb = 0;
                     if(print_verbose)
                         printf("%d %d %d: BLOCK -> READY\n", evt->time_stamp, proc->proc_num, time_in_state);
                     block_counter --;
+                    proc->dynamic_prio = proc->static_prio-1;
                 }
                 proc->ready_start_time = current_time;
                 sched->add_process(proc, ready_queue); //add to ready_Q --> main functionality of whichever algorithm.
+                printf("added process <%d>\n", proc->proc_num);
 //                printf("ready proc AT = <%d>\n", ready_queue.front()->AT);
                 print_ready_q(ready_queue);
+                if(proc->dynamic_prio==-1) {
+                    proc->dynamic_prio = proc->static_prio - 1;
+                    proc->expired = true;
+                }
                 call_sched = true;
                 break;
             case TRANS_TO_RUNNING:
-                if(!reuse_cb) {
-                    cb = get_random_number(proc->get_CB(), ofs, rand_vals); //create random CB
-                    cb_counter = cb;
+//                if(!reuse_cb) {
+                if(proc->current_cb==0)
+                    proc->current_cb = get_random_number(proc->get_CB(), ofs, rand_vals); //create random CB
+                if(proc->current_cb > proc->TC)
+                    proc->current_cb = proc->TC;
+                if(proc->current_cb > time_quantum) {
+
+                    put_event(current_time+time_quantum, proc, TRANS_TO_READY, event_list);
+                    if(print_verbose)
+                        printf("%d %d %d: READY -> RUNNG cb=%d rem=%d prio=%d\n", evt->time_stamp, proc->proc_num,
+                               time_in_state, proc->current_cb, proc->TC, proc->dynamic_prio);
+                    proc->TC = proc->TC - time_quantum;
+                    proc->CW += time_in_state;
+                    proc->total_cb += time_quantum;
+                    proc->prev_state = TRANS_TO_RUNNING;
+                    break;
                 }
-                else {
-                    cb = time_quantum;
-                    if(cb_counter >= time_quantum) {
-                        cb_counter -= cb;
-                    }
-                    else {
-                        cb = cb_counter;
-                        reuse_cb = false;
-                    }
-                }
-                if(cb > proc->TC)
-                    cb = proc->TC;
-//                time_in_state = 0;
+
                 if(print_verbose)
                     printf("%d %d %d: READY -> RUNNG cb=%d rem=%d prio=%d\n", evt->time_stamp, proc->proc_num,
-                            time_in_state, cb, proc->TC, proc->static_prio-1);
-                if(cb > time_quantum) {
-                    cb = time_quantum;  //adjust for quantum after printing original CB
+                            time_in_state, proc->current_cb, proc->TC, proc->dynamic_prio);
 
-                }
-                proc->TC = proc->TC - cb;
+                proc->TC = proc->TC - proc->current_cb;
                 proc->CW += time_in_state;
-                proc->total_cb += cb;
+                proc->total_cb += proc->current_cb;
                 proc->prev_state = TRANS_TO_RUNNING;
-                if(!reuse_cb)
-                    put_event(current_time+cb, proc, TRANS_TO_BLOCKED, event_list);
-                else
-                    put_event(current_time+cb, proc, TRANS_TO_READY, event_list);
+                put_event(current_time + proc->current_cb, proc, TRANS_TO_BLOCKED, event_list);
 
-                if(time_quantum < cb)
-                    reuse_cb = true;
 
                 break;
             case TRANS_TO_BLOCKED:
@@ -437,7 +449,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                 if(proc->TC==0)
                 {
                     if(print_verbose)
-                        printf("%d %d %d: Done\n", current_time, proc->proc_num, cb);
+                        printf("%d %d %d: Done\n", current_time, proc->proc_num, proc->current_cb);
                     proc->FT = current_time;
                     proc->TT = current_time - proc->AT;
                     put_event(proc->proc_num, proc, TRANS_TO_READY, finished_processes);
@@ -455,6 +467,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                 //and update remaining time (for SRTF)
                 break;
             case TRANS_TO_PREEMPT:
+
                 call_sched = true;
                 break;
         }
@@ -487,7 +500,10 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
     double total_cpu_util=0, total_io_util=0, total_tt=0, total_cw=0, thru_put=0.0;
     int fin_time=0, counter=0;
     list<Event *>::iterator iter = finished_processes.begin();
-    cout << sched_algo << endl;
+    if(time_quantum == 10000)
+        cout << sched_algo << endl;
+    else
+        cout << sched_algo << " " << time_quantum << endl;
 //    cout << sched_algo << " " << time_quantum << endl;
 //    printf("%s\n", sched_algo);
     for(iter=finished_processes.begin(); iter!=finished_processes.end(); ++iter)

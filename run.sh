@@ -1,4 +1,7 @@
-g++ main.cpp
+g++ main.cpp -o main
+cd lab2_assign/
+./runit.sh runit_outputs/ ../main -v
+./gradeit.sh refout_v/ runit_outputs/
 
 
 
