@@ -9,6 +9,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
         vector<int> rand_vals, int time_quantum, sched_type schedType);
 int get_next_event_time(list<Event *> event_list);
 int get_random_number(int burst, int &ofs, vector<int> rand_vals);
+void e_sched_evt_queue(list<Event *> &evt_queue, Process *current_proc, Event *new_evt, int current_time);
 
 //bool debug = true;
 bool debug = false;
@@ -33,7 +34,7 @@ int main(int argc, char **argv) {
 //    sched_type schedType;
     int option;
     string rand_ints_file_path = "./lab2_assign/rfile";
-    string file_path = "./lab2_assign/input2";
+    string file_path = "./lab2_assign/input3";
 
 
     if (argc > 1) {
@@ -105,8 +106,8 @@ int main(int argc, char **argv) {
     }
     else {
         print_verbose = true;
-        schedType = P;
-        time_quantum = 2;
+        schedType = E;
+        time_quantum = 4;
         max_prio = 4;
 
     }
@@ -301,6 +302,35 @@ Event *get_event(list<Event *> &event_list)
 }
 
 
+void e_sched_evt_queue(list<Event *> &evt_queue, Process *current_proc, Event *new_evt, int current_time) {
+    list<Event *>::iterator iter;
+    bool is_preempted = true;
+
+    for(iter=evt_queue.begin(); iter!=evt_queue.end();) {
+        if((*iter)->time_stamp==current_time && current_proc->proc_num == (*iter)->process->proc_num) {
+            iter = evt_queue.erase(iter);
+//            evt_queue.remove(*iter);
+            iter ++;
+            evt_queue.push_front((*iter));
+            is_preempted = false;
+        }
+        else if((*iter)->time_stamp!=current_time && current_proc->proc_num == (*iter)->process->proc_num) {
+            iter = evt_queue.erase(iter);
+//            evt_queue.remove(*iter);
+            iter ++;
+        }
+        else {
+            ++iter;
+        }
+    }
+    if(is_preempted) {
+        Event *temp_evt = new Event(current_time, current_proc, TRANS_TO_READY);
+        evt_queue.push_front(temp_evt);
+    }
+}
+
+
+
 void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs,
         vector<int> rand_vals, int time_quantum, sched_type schedType)
 {
@@ -351,6 +381,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
 
     while((evt = get_event(event_list)))
     {
+        cout << evt->process << endl;
         Process *proc = evt->process;
         delta_time = evt->time_stamp - current_time;
         current_time = evt->time_stamp;
@@ -381,6 +412,16 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
         switch(evt->state)
         {
             case TRANS_TO_READY:
+                if(schedType==E && CURRENT_RUNNING_PROCESS != nullptr) {
+                    if(CURRENT_RUNNING_PROCESS->dynamic_prio < proc->dynamic_prio) {
+                        evt->state = TRANS_TO_PREEMPT;
+                        Event *evt1 = new Event(evt->time_stamp, evt->process, evt->state);
+                        event_list.push_front(evt1);
+                        e_sched_evt_queue(event_list, CURRENT_RUNNING_PROCESS, evt, current_time);
+                        break;
+                    }
+                }
+
                 if(proc->prev_state==TRANS_TO_RUNNING) {
                     CURRENT_RUNNING_PROCESS = nullptr;
                     proc->current_cb -= time_quantum;
@@ -399,6 +440,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                     proc->dynamic_prio = proc->static_prio-1;
                 }
                 proc->ready_start_time = current_time;
+
                 sched->add_process(proc, ready_queue); //add to ready_Q --> main functionality of whichever algorithm.
 //                printf("added process <%d>\n", proc->proc_num);
 //                printf("ready proc AT = <%d>\n", ready_queue.front()->AT);
@@ -465,7 +507,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                 //and update remaining time (for SRTF)
                 break;
             case TRANS_TO_PREEMPT:
-
+                CURRENT_RUNNING_PROCESS = nullptr;
                 call_sched = true;
                 break;
         }
