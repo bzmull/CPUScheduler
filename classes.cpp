@@ -63,7 +63,7 @@ public:
 //    {
 //        this->ready_queue = ready_queue;
 //    }
-    Process* get_next_process(list <Process *> &ready_queue) //gets from ready_q
+    virtual Process* get_next_process(list <Process *> &ready_queue) //gets from ready_q
     {
         if(ready_queue.empty())
             return nullptr;
@@ -132,37 +132,94 @@ class Prio : public Scheduler
 {
 public:
 
-    list<Process *> active_ready;
+//    list<Process *> active_ready;
     list<Process *> expired_ready;
 
-    void add_process(Process *process, list<Process *> &ready_queue)
+    void add_process(Process *process, list<Process *> &active_ready)
     {
-        bool is_empty = false;
-        if(process->expired) {
-            expired_ready.push_back(process);
-            process->expired = false;
+//        printf("prev state = <%d>\n", process->prev_state);
+//        ready_queue.push_back(process);
+        // SORT BY PRIO
+
+        if(process->dynamic_prio == -1) {
+            process->dynamic_prio = process->static_prio-1;
+            list<Process *>::iterator iter;
+            for(iter = expired_ready.begin(); iter!=expired_ready.end(); ++iter) {
+                if(process->dynamic_prio > (*iter)->dynamic_prio) {
+                    expired_ready.insert(iter, process);
+                    return;
+                }
+            }
+            expired_ready.insert(iter, process);
         }
         else {
-            active_ready.push_back(process);
+            list<Process *>::iterator iter;
+            for(iter = active_ready.begin(); iter!=active_ready.end(); ++iter) {
+                if(process->dynamic_prio > (*iter)->dynamic_prio) {
+                    active_ready.insert(iter, process);
+                    return;
+                }
+            }
+            active_ready.insert(iter, process);
         }
+    }
+
+    Process* get_next_process(list <Process *> &active_ready) {
         if(active_ready.empty()) {
-            is_empty = true;
+            active_ready.swap(expired_ready);
         }
-        if(!is_empty) {
-            ready_queue = active_ready;
+        if (active_ready.empty()) {
+            return nullptr;
         }
-        else {
-            ready_queue = expired_ready;
-        }
+        Process *proc = active_ready.front();
+        active_ready.pop_front();
+        return proc;
     }
 };
 
 
 class PrePrio : public Scheduler
 {
-public:
-    void add_process(Process *process, list<Process *> &ready_queue)
+    list<Process *> expired_ready;
+
+    void add_process(Process *process, list<Process *> &active_ready)
     {
-        ready_queue.push_back(process);
+//        printf("prev state = <%d>\n", process->prev_state);
+//        ready_queue.push_back(process);
+        // SORT BY PRIO
+
+        if(process->dynamic_prio == -1) {
+            process->dynamic_prio = process->static_prio-1;
+            list<Process *>::iterator iter;
+            for(iter = expired_ready.begin(); iter!=expired_ready.end(); ++iter) {
+                if(process->dynamic_prio > (*iter)->dynamic_prio) {
+                    expired_ready.insert(iter, process);
+                    return;
+                }
+            }
+            expired_ready.insert(iter, process);
+        }
+        else {
+            list<Process *>::iterator iter;
+            for(iter = active_ready.begin(); iter!=active_ready.end(); ++iter) {
+                if(process->dynamic_prio > (*iter)->dynamic_prio) {
+                    active_ready.insert(iter, process);
+                    return;
+                }
+            }
+            active_ready.insert(iter, process);
+        }
+    }
+
+    Process* get_next_process(list <Process *> &active_ready) {
+        if(active_ready.empty()) {
+            active_ready.swap(expired_ready);
+        }
+        if (active_ready.empty()) {
+            return nullptr;
+        }
+        Process *proc = active_ready.front();
+        active_ready.pop_front();
+        return proc;
     }
 };

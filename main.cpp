@@ -106,8 +106,8 @@ int main(int argc, char **argv) {
     else {
         print_verbose = true;
         schedType = P;
-        time_quantum = 5;
-        max_prio = 3;
+        time_quantum = 2;
+        max_prio = 4;
 
     }
 //    cout << schedType << " " << time_quantum << endl;
@@ -246,7 +246,7 @@ void print_ready_q(list<Process *> ready_q)
     printf("Ready Queue: ");
     for(list<Process*>::iterator iter = ready_q.begin(); iter!=ready_q.end(); ++iter)
     {
-        printf("pid = <%d>; ", (*iter)->proc_num);
+        printf("pid = <%d>; prio = <%d> ;", (*iter)->proc_num, (*iter)->dynamic_prio);
     }
     printf("\n");
 }
@@ -400,13 +400,10 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                 }
                 proc->ready_start_time = current_time;
                 sched->add_process(proc, ready_queue); //add to ready_Q --> main functionality of whichever algorithm.
-                printf("added process <%d>\n", proc->proc_num);
+//                printf("added process <%d>\n", proc->proc_num);
 //                printf("ready proc AT = <%d>\n", ready_queue.front()->AT);
                 print_ready_q(ready_queue);
-                if(proc->dynamic_prio==-1) {
-                    proc->dynamic_prio = proc->static_prio - 1;
-                    proc->expired = true;
-                }
+
                 call_sched = true;
                 break;
             case TRANS_TO_RUNNING:
@@ -455,6 +452,7 @@ void simulation(list<Event *> &event_list, list<Process *> &ready_queue, int ofs
                     put_event(proc->proc_num, proc, TRANS_TO_READY, finished_processes);
                 }
                 else {
+                    proc->prev_state = TRANS_TO_BLOCKED;
                     block_counter++;
                     io = get_random_number(proc->get_IO(), ofs, rand_vals); //create random IO
                     proc->IT = proc->IT + io;
